@@ -1,0 +1,93 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+[package]
+name = "arrow-flight"
+description = "Apache Arrow Flight"
+version = "53.3.0"
+edition = "2021"
+rust-version = "1.71.1"
+
+[dependencies]
+arrow-arith = "53.3.0"
+arrow-array = "53.3.0"
+arrow-buffer = "53.3.0"
+# Cast is needed to work around https://github.com/apache/arrow-rs/issues/3389
+arrow-cast = "53.3.0"
+arrow-data = "53.3.0"
+arrow-ipc = "53.3.0"
+arrow-ord = "53.3.0"
+arrow-row = "53.3.0"
+arrow-select = "53.3.0"
+arrow-schema = "53.3.0"
+arrow-string = "53.3.0"
+base64 = { version = "0.22", default-features = false, features = ["std"] }
+bytes = { version = "1", default-features = false }
+futures = { version = "0.3", default-features = false, features = ["alloc"] }
+once_cell = { version = "1" }
+paste = { version = "1.0" }
+prost = { version = "0.13.1", default-features = false, features = ["prost-derive"] }
+# For Timestamp type
+prost-types = { version = "0.13.1", default-features = false }
+tokio = { version = "1.0", default-features = false, features = ["macros", "rt", "rt-multi-thread"] }
+tonic = { version = "0.12.3", default-features = false, features = ["transport", "codegen", "prost"] }
+
+# CLI-related dependencies
+anyhow = { version = "1.0", optional = true }
+clap = { version = "4.4.6", default-features = false, features = ["std", "derive", "env", "help", "error-context", "usage", "wrap_help", "color", "suggestions"], optional = true }
+tracing-log = { version = "0.2", optional = true }
+tracing-subscriber = { version = "0.3.1", default-features = false, features = ["ansi", "env-filter", "fmt"], optional = true }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+tls = ["tonic/tls"]
+
+# Enable CLI tools
+cli = ["dep:anyhow", "arrow-array/chrono-tz", "arrow-cast/prettyprint", "dep:clap", "dep:tracing-log", "dep:tracing-subscriber", "tonic/tls-webpki-roots"]
+
+[dev-dependencies]
+arrow-cast = { version = "53.3.0", features = ["prettyprint"] }
+assert_cmd = "2.0.8"
+http = "1.1.0"
+http-body = "1.0.0"
+hyper-util = "0.1"
+pin-project-lite = "0.2"
+tempfile = "3.3"
+tokio-stream = { version = "0.1", features = ["net"] }
+tower = { version = "0.5.0", features = ["util"] }
+uuid = { version = "1.10.0", features = ["v4"] }
+
+[[example]]
+name = "flight_sql_server"
+required-features = ["tls"]
+
+[[bin]]
+name = "flight_sql_client"
+required-features = ["cli", "tls"]
+
+[[test]]
+name = "flight_sql_client"
+path = "tests/flight_sql_client.rs"
+required-features = ["tls"]
+
+[[test]]
+name = "flight_sql_client_cli"
+path = "tests/flight_sql_client_cli.rs"
+required-features = ["cli", "tls"]
